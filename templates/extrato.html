@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Extrato</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h2>📊 Extrato</h2>
+
+    <a href="/dashboard"><button>⬅ Voltar</button></a>
+
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Tipo</th>
+            <th>Valor</th>
+            <th>Data</th>
+        </tr>
+
+        {% for t in dados %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ t[0] }}</td>
+            <td>R$ {{ "%.2f"|format(t[1]) }}</td>
+            <td>{{ t[2] }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+</div>
+
+</body>
+</html>

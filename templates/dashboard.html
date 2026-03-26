@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Banco Master</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>💜 Banco Master</h1>
+
+    <div class="card">
+        <p>Olá, {{ usuario }}</p>
+        <div class="saldo">R$ {{ "%.2f"|format(saldo) }}</div>
+    </div>
+
+    <form action="/depositar" method="POST">
+        <input type="number" name="valor" placeholder="Valor depósito" required>
+        <button>Depositar</button>
+    </form>
+
+    <form action="/sacar" method="POST">
+        <input type="number" name="valor" placeholder="Valor saque" required>
+        <button>Sacar</button>
+    </form>
+
+    <a href="/transferir"><button>💸 Transferir</button></a>
+    <a href="/extrato"><button>📊 Extrato</button></a>
+    <a href="/logout"><button>Sair</button></a>
+
+    <canvas id="grafico"></canvas>
+
+</div>
+
+<script>
+const ctx = document.getElementById('grafico');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Depósitos', 'Saques'],
+        datasets: [{
+            label: 'Movimentação',
+            data: [{{ total_depositos }}, {{ total_saques }}]
+        }]
+    }
+});
+</script>
+
+</body>
+</html>
