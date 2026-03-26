@@ -2,9 +2,10 @@ from flask import Flask, render_template, request, redirect, session, flash
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import os
 
 app = Flask(__name__)
-app.secret_key = "banco_master3_secret"
+app.secret_key = os.getenv("SECRET_KEY", "banco_master3_secret")
 
 # =========================
 # 🔹 BANCO DE DADOS
@@ -45,7 +46,10 @@ def criar_admin():
     cursor.execute("SELECT * FROM usuarios WHERE usuario='admin'")
     if not cursor.fetchone():
         senha = generate_password_hash("123")
-        cursor.execute("INSERT INTO usuarios VALUES (NULL, ?, ?, ?)", ("admin", senha, 1000))
+        cursor.execute(
+            "INSERT INTO usuarios VALUES (NULL, ?, ?, ?)",
+            ("admin", senha, 1000)
+        )
         conn.commit()
 
     conn.close()
@@ -97,7 +101,10 @@ def cadastro():
         cursor = conn.cursor()
 
         try:
-            cursor.execute("INSERT INTO usuarios VALUES (NULL, ?, ?, ?)", (usuario, senha, 0))
+            cursor.execute(
+                "INSERT INTO usuarios VALUES (NULL, ?, ?, ?)",
+                (usuario, senha, 0)
+            )
             conn.commit()
         except:
             flash("Usuário já existe")
@@ -125,11 +132,17 @@ def dashboard():
     saldo = cursor.fetchone()[0]
 
     # depósitos
-    cursor.execute("SELECT SUM(valor) FROM transacoes WHERE usuario=? AND tipo='Depósito'", (usuario,))
+    cursor.execute(
+        "SELECT SUM(valor) FROM transacoes WHERE usuario=? AND tipo='Depósito'",
+        (usuario,)
+    )
     total_depositos = cursor.fetchone()[0] or 0
 
     # saques
-    cursor.execute("SELECT SUM(valor) FROM transacoes WHERE usuario=? AND tipo='Saque'", (usuario,))
+    cursor.execute(
+        "SELECT SUM(valor) FROM transacoes WHERE usuario=? AND tipo='Saque'",
+        (usuario,)
+    )
     total_saques = cursor.fetchone()[0] or 0
 
     conn.close()
@@ -154,8 +167,15 @@ def depositar():
     conn = conectar()
     cursor = conn.cursor()
 
-    cursor.execute("UPDATE usuarios SET saldo = saldo + ? WHERE usuario=?", (valor, usuario))
-    cursor.execute("INSERT INTO transacoes VALUES (NULL, ?, 'Depósito', ?, ?)", (usuario, valor, data))
+    cursor.execute(
+        "UPDATE usuarios SET saldo = saldo + ? WHERE usuario=?",
+        (valor, usuario)
+    )
+
+    cursor.execute(
+        "INSERT INTO transacoes VALUES (NULL, ?, 'Depósito', ?, ?)",
+        (usuario, valor, data)
+    )
 
     conn.commit()
     conn.close()
@@ -174,12 +194,23 @@ def sacar():
     conn = conectar()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT saldo FROM usuarios WHERE usuario=?", (usuario,))
+    cursor.execute(
+        "SELECT saldo FROM usuarios WHERE usuario=?",
+        (usuario,)
+    )
     saldo = cursor.fetchone()[0]
 
     if valor <= saldo:
-        cursor.execute("UPDATE usuarios SET saldo = saldo - ? WHERE usuario=?", (valor, usuario))
-        cursor.execute("INSERT INTO transacoes VALUES (NULL, ?, 'Saque', ?, ?)", (usuario, valor, data))
+        cursor.execute(
+            "UPDATE usuarios SET saldo = saldo - ? WHERE usuario=?",
+            (valor, usuario)
+        )
+
+        cursor.execute(
+            "INSERT INTO transacoes VALUES (NULL, ?, 'Saque', ?, ?)",
+            (usuario, valor, data)
+        )
+
         conn.commit()
     else:
         flash("Saldo insuficiente")
@@ -204,12 +235,16 @@ def transferir():
         conn = conectar()
         cursor = conn.cursor()
 
-        # saldo origem
-        cursor.execute("SELECT saldo FROM usuarios WHERE usuario=?", (origem,))
+        cursor.execute(
+            "SELECT saldo FROM usuarios WHERE usuario=?",
+            (origem,)
+        )
         saldo = cursor.fetchone()[0]
 
-        # verifica destino
-        cursor.execute("SELECT * FROM usuarios WHERE usuario=?", (destino,))
+        cursor.execute(
+            "SELECT * FROM usuarios WHERE usuario=?",
+            (destino,)
+        )
         existe = cursor.fetchone()
 
         if not existe:
@@ -220,12 +255,25 @@ def transferir():
             flash("Saldo insuficiente")
             return redirect('/transferir')
 
-        # transferência
-        cursor.execute("UPDATE usuarios SET saldo = saldo - ? WHERE usuario=?", (valor, origem))
-        cursor.execute("UPDATE usuarios SET saldo = saldo + ? WHERE usuario=?", (valor, destino))
+        cursor.execute(
+            "UPDATE usuarios SET saldo = saldo - ? WHERE usuario=?",
+            (valor, origem)
+        )
 
-        cursor.execute("INSERT INTO transacoes VALUES (NULL, ?, 'Transferência enviada', ?, ?)", (origem, valor, data))
-        cursor.execute("INSERT INTO transacoes VALUES (NULL, ?, 'Transferência recebida', ?, ?)", (destino, valor, data))
+        cursor.execute(
+            "UPDATE usuarios SET saldo = saldo + ? WHERE usuario=?",
+            (valor, destino)
+        )
+
+        cursor.execute(
+            "INSERT INTO transacoes VALUES (NULL, ?, 'Transferência enviada', ?, ?)",
+            (origem, valor, data)
+        )
+
+        cursor.execute(
+            "INSERT INTO transacoes VALUES (NULL, ?, 'Transferência recebida', ?, ?)",
+            (destino, valor, data)
+        )
 
         conn.commit()
         conn.close()
@@ -244,7 +292,10 @@ def extrato():
     conn = conectar()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT tipo, valor, data_hora FROM transacoes WHERE usuario=?", (usuario,))
+    cursor.execute(
+        "SELECT tipo, valor, data_hora FROM transacoes WHERE usuario=?",
+        (usuario,)
+    )
     dados = cursor.fetchall()
 
     conn.close()
@@ -259,8 +310,9 @@ def logout():
     session.clear()
     return redirect('/login')
 
-# -------------------------
-# START
-# -------------------------
+# =========================
+# 🔹 START (RENDER)
+# =========================
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
