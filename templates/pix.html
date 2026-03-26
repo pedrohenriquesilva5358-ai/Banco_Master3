@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PIX</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h2>⚡ PIX</h2>
+
+    <form method="POST">
+        <input type="text" name="chave" placeholder="Usuário ou chave PIX" required>
+        <input type="number" name="valor" step="0.01" placeholder="Valor" required>
+        <button>Enviar PIX</button>
+    </form>
+
+    <a href="/dashboard"><button>Voltar</button></a>
+</div>
+
+</body>
+</html>

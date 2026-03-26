@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Relatório</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h2>📊 Relatório</h2>
+
+    <p>Total de operações: {{ total_operacoes }}</p>
+    <p>Total movimentado: R$ {{ "%.2f"|format(total_movimentado) }}</p>
+
+    <a href="/dashboard"><button>Voltar</button></a>
+</div>
+
+</body>
+</html>
