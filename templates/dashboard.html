@@ -1,2 +1,46 @@
-<a href="/pix"><button>⚡ PIX</button></a>
-<a href="/relatorio"><button>📊 Relatório</button></a>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Banco Esperança</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="topo">
+    💜 Banco Esperança
+</div>
+
+<div class="container">
+
+    <div class="card">
+        <h3>Olá, {{ usuario }}</h3>
+        <h2>Saldo: R$ {{ "%.2f"|format(saldo) }}</h2>
+    </div>
+
+    <div class="card">
+        <h3>Movimentação Total</h3>
+        <p>R$ {{ "%.2f"|format(total) }}</p>
+    </div>
+
+    <div class="card">
+        <form action="/depositar" method="POST">
+            <input type="number" step="0.01" name="valor" placeholder="Valor depósito" required>
+            <button>Depositar</button>
+        </form>
+
+        <form action="/sacar" method="POST">
+            <input type="number" step="0.01" name="valor" placeholder="Valor saque" required>
+            <button>Sacar</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <a href="/pix"><button>⚡ PIX</button></a>
+        <a href="/relatorio"><button>📊 Relatório</button></a>
+        <a href="/logout"><button>Sair</button></a>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -7,6 +7,9 @@ import os
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "banco_master3")
 
+# =========================
+# 🔹 BANCO DE DADOS
+# =========================
 def conectar():
     return sqlite3.connect('banco.db')
 
@@ -55,7 +58,16 @@ def criar_admin():
 criar_tabelas()
 criar_admin()
 
-# LOGIN
+# =========================
+# 🔹 HOME (CORRIGIDO)
+# =========================
+@app.route('/')
+def home():
+    return redirect('/login')
+
+# =========================
+# 🔹 LOGIN
+# =========================
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
@@ -76,7 +88,9 @@ def login():
 
     return render_template('login.html')
 
-# DASHBOARD
+# =========================
+# 🔹 DASHBOARD
+# =========================
 @app.route('/dashboard')
 def dashboard():
     if 'usuario' not in session:
@@ -97,7 +111,9 @@ def dashboard():
 
     return render_template('dashboard.html', usuario=usuario, saldo=saldo, total=total)
 
-# DEPÓSITO
+# =========================
+# 🔹 DEPÓSITO
+# =========================
 @app.route('/depositar', methods=['POST'])
 def depositar():
     valor = float(request.form['valor'])
@@ -115,7 +131,9 @@ def depositar():
 
     return redirect('/dashboard')
 
-# SAQUE
+# =========================
+# 🔹 SAQUE
+# =========================
 @app.route('/sacar', methods=['POST'])
 def sacar():
     valor = float(request.form['valor'])
@@ -138,7 +156,9 @@ def sacar():
     conn.close()
     return redirect('/dashboard')
 
-# PIX
+# =========================
+# 🔹 PIX
+# =========================
 @app.route('/pix', methods=['GET','POST'])
 def pix():
     if 'usuario' not in session:
@@ -182,7 +202,9 @@ def pix():
 
     return render_template('pix.html')
 
-# RELATÓRIO
+# =========================
+# 🔹 RELATÓRIO
+# =========================
 @app.route('/relatorio')
 def relatorio():
     if 'usuario' not in session:
@@ -201,14 +223,21 @@ def relatorio():
 
     conn.close()
 
-    return render_template('relatorio.html', total_operacoes=total_operacoes, total_movimentado=total_movimentado)
+    return render_template('relatorio.html',
+                           total_operacoes=total_operacoes,
+                           total_movimentado=total_movimentado)
 
-# LOGOUT
+# =========================
+# 🔹 LOGOUT
+# =========================
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect('/login')
 
+# =========================
+# 🔹 START (LOCAL + RENDER)
+# =========================
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
